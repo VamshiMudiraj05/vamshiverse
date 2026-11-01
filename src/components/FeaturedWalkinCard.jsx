@@ -156,3 +156,4 @@ export default function FeaturedWalkinCard({ job }) {
     </div>
   );
 }
+
