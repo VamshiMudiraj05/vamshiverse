@@ -1,9 +1,13 @@
 import React from "react";
 import JobCard from "./JobCard";
-import { Calendar, PlusCircle, Sparkles } from "lucide-react";
+import FeaturedWalkinCard from "./FeaturedWalkinCard";
+import { Sparkles } from "lucide-react";
 
-export default function JobTimeline({ groups = [] }) {
-  if (groups.length === 0) {
+export default function JobTimeline({ pinnedJobs = [], groups = [] }) {
+  const hasPinned = pinnedJobs && pinnedJobs.length > 0;
+  const hasGroups = groups && groups.length > 0;
+
+  if (!hasPinned && !hasGroups) {
     return (
       <section className="w-full">
         <div className="rounded-2xl sm:rounded-3xl border border-dashed border-black/15 dark:border-white/15 p-8 sm:p-12 text-center bg-white/40 dark:bg-[#111113]/40 backdrop-blur-xs">
@@ -31,7 +35,17 @@ export default function JobTimeline({ groups = [] }) {
 
   return (
     <section className="w-full flex flex-col gap-10 sm:gap-12" aria-label="Job entries chronological feed">
-      {groups.map((group, groupIndex) => (
+      {/* Pinned / Highlighted Drives Section (Stays on top till date passes) */}
+      {hasPinned && (
+        <div className="flex flex-col gap-5">
+          {pinnedJobs.map((pinnedJob) => (
+            <FeaturedWalkinCard key={pinnedJob.id} job={pinnedJob} />
+          ))}
+        </div>
+      )}
+
+      {/* Chronological Date Groups Feed */}
+      {groups.map((group) => (
         <div key={group.date} className="relative flex flex-col gap-4">
           {/* Date Heading Header */}
           <div className="flex items-center justify-between pb-3 border-b border-black/[0.08] dark:border-white/[0.1]">
@@ -68,4 +82,3 @@ export default function JobTimeline({ groups = [] }) {
     </section>
   );
 }
-

@@ -18,6 +18,15 @@ export default function JobCard({ job, index }) {
           </span>
 
           <div className="flex-1 min-w-0">
+            {/* Optional Category / Type Badge */}
+            {job.badge && (
+              <div className="mb-1.5">
+                <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-[#c2185b] dark:text-[#f3b9c8] bg-[#fce7ec] dark:bg-[#2a1720] px-2 py-0.5 rounded border border-[#f3b9c8]/50 dark:border-[#c2185b]/40 uppercase tracking-wider">
+                  {job.badge}
+                </span>
+              </div>
+            )}
+
             {/* Job Title */}
             <h3 className="font-sans font-semibold text-base sm:text-lg text-gray-900 dark:text-white leading-snug tracking-tight">
               {targetUrl ? (

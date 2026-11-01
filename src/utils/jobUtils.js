@@ -51,23 +51,53 @@ export function isValidUrl(url) {
 
 /**
  * Groups and sorts job entries:
+ * - Separates active pinned jobs (isPinned === true && pinnedUntil >= today)
+ * - Once pinnedUntil crosses today's date, the job naturally falls back to chronological list
  * - Grouped by `date` (YYYY-MM-DD)
  * - Dates sorted in descending order (latest first)
- * - Jobs within each date sorted by `createdAt` descending, or stable
+ * - Jobs within each date sorted by `createdAt` descending
  * - Identifies whether each date corresponds to today (using local time)
  */
 export function processJobs(rawJobs = []) {
   if (!Array.isArray(rawJobs) || rawJobs.length === 0) {
     return {
+      pinnedJobs: [],
       groups: [],
       totalCount: 0,
     };
   }
 
   const todayStr = getLocalTodayString();
-  const groupedMap = new Map();
+  const pinnedJobs = [];
+  const regularJobs = [];
 
   for (const job of rawJobs) {
+    if (!job) continue;
+
+    // A job is actively pinned if isPinned is true and it hasn't crossed its pinnedUntil date
+    const isActivelyPinned = Boolean(
+      job.isPinned && (!job.pinnedUntil || String(job.pinnedUntil).trim() >= todayStr)
+    );
+
+    if (isActivelyPinned) {
+      pinnedJobs.push(job);
+    } else {
+      regularJobs.push(job);
+    }
+  }
+
+  // Sort pinned jobs by pinnedUntil ascending (earliest expiring first)
+  pinnedJobs.sort((a, b) => {
+    if (a.pinnedUntil && b.pinnedUntil) {
+      return a.pinnedUntil.localeCompare(b.pinnedUntil);
+    }
+    return 0;
+  });
+
+  // Group regular (unpinned or expired) entries by date
+  const groupedMap = new Map();
+
+  for (const job of regularJobs) {
     if (!job || !job.date) continue;
     const dateKey = String(job.date).trim();
     if (!groupedMap.has(dateKey)) {
@@ -84,7 +114,7 @@ export function processJobs(rawJobs = []) {
   const groups = sortedDates.map((dateKey) => {
     const jobsInDate = groupedMap.get(dateKey);
 
-    // Sort jobs within date consistently by createdAt descending, fallback to id
+    // Sort jobs within date consistently by createdAt descending
     jobsInDate.sort((a, b) => {
       if (a.createdAt && b.createdAt) {
         return new Date(b.createdAt) - new Date(a.createdAt);
@@ -103,8 +133,8 @@ export function processJobs(rawJobs = []) {
   });
 
   return {
+    pinnedJobs,
     groups,
     totalCount: rawJobs.length,
   };
 }
-

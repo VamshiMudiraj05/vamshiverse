@@ -33,8 +33,8 @@ export default function App() {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  // Process and sort jobs data
-  const { groups, totalCount } = useMemo(() => {
+  // Process and sort jobs data (including active pinned walk-in drives)
+  const { pinnedJobs, groups, totalCount } = useMemo(() => {
     return processJobs(rawJobs);
   }, []);
 
@@ -53,9 +53,9 @@ export default function App() {
 
         {/* Two-Column Layout on Desktop (~70% Main Job Feed / ~30% Profile Sidebar) */}
         <div className="mt-4 sm:mt-6 flex flex-col lg:flex-row items-start gap-8 lg:gap-10">
-          {/* Main Column: Chronological Job Feed (~70%) */}
+          {/* Main Column: Chronological Job Feed & Pinned Walk-in Drives (~70%) */}
           <div className="w-full lg:w-[68%] flex-1">
-            <JobTimeline groups={groups} />
+            <JobTimeline pinnedJobs={pinnedJobs} groups={groups} />
           </div>
 
           {/* Sidebar Column: About Vamshi (~30%) */}
@@ -70,4 +70,3 @@ export default function App() {
     </div>
   );
 }
-
